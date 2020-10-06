@@ -1,4 +1,4 @@
-from .cli import cli
+from netcfg_grep.cli.cli import cli
 
 
 def run():
