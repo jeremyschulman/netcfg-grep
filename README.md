@@ -1,4 +1,4 @@
-# Network Config Grep
+# Network Device Config Grep Tool
 
 This package contains a tool called `netcfg-grep` that allows a User to extract (grep)
 specific sections of a network configuration file.  The motivating use-case:
