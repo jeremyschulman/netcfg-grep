@@ -23,6 +23,6 @@ VERSION = metadata.version("netcfg-grep")
 )
 def cli(config, device_config_file):
     ncg_config = yaml.safe_load(config)
-    results = grep(ncg_config=ncg_config, netcfg_filepath=device_config_file.name)
-    pass
+    results_list = grep(ncg_config=ncg_config, netcfg_filepath=device_config_file.name)
+    print('\n\n'.join(results_list))
 

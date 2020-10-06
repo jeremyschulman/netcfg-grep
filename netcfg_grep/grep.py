@@ -23,19 +23,29 @@ __all__ = ['grep']
 #
 # -----------------------------------------------------------------------------
 
+_LINE_START_ = '^'
+_LINE_END_ = '\s*$'
 
-def grep_include(parsed: CiscoConfParse, expr: str):
-    pass
+
+def grep_include_line(parsed: CiscoConfParse, expr: str):
+    found = parsed.find_lines(_LINE_START_ + expr)
+
+    if (n_found := len(found)) != 1:
+        raise RuntimeError(
+            f'Not exactly one ({n_found}) matching expr: {expr}'
+        )
+
+    return found[0]
 
 
-def grep_include_exact_lines(parsed: CiscoConfParse, expr: List[str]) -> str:
+def grep_include_exact_lines(parsed: CiscoConfParse, expr: str) -> str:
     res = list()
 
-    for each_expr in expr:
-        found = parsed.find_lines(re.escape(each_expr))
-        if (n_found := len(found)) > 1:
+    for each_expr in expr.splitlines(keepends=False):
+        found = parsed.find_lines(_LINE_START_ + re.escape(each_expr.strip()) + _LINE_END_)
+        if (n_found := len(found)) != 1:
             raise RuntimeError(
-                f'Found more than one ({n_found}) matching expr: {each_expr}'
+                f'Not exactly one ({n_found}) matching expr: {each_expr}'
             )
 
         res.append(found[0])
@@ -44,19 +54,19 @@ def grep_include_exact_lines(parsed: CiscoConfParse, expr: List[str]) -> str:
 
 
 def grep_include_block(parsed: CiscoConfParse, expr: str) -> str:
-    pass
+    return '\n'.join(parsed.find_all_children(_LINE_START_ + expr + _LINE_END_))
 
 
 def grep_include_exact_block(parsed: CiscoConfParse, expr: str) -> str:
-    pass
+    return '\n'.join(parsed.find_all_children(_LINE_START_ + re.escape(expr) + _LINE_END_))
 
 
 def grep_include_block_lines(parsed: CiscoConfParse, expr: str) -> str:
-    pass
+    return '\n'.join(parsed.find_all_children(_LINE_START_ + expr))
 
 
 FILTER_OPTIONS = {
-    'include': grep_include,
+    'include-line': grep_include_line,
     'include-exact-lines': grep_include_exact_lines,
     'include-block': grep_include_block,
     'include-exact-block': grep_include_exact_block,
@@ -115,6 +125,4 @@ def grep(ncg_config: dict, netcfg_filepath) -> List[str]:
         res = filter_func(parsed, expr=filter_rec[filter_opt])
         grep_results.append(res)
 
-    breakpoint()
     return grep_results
-
