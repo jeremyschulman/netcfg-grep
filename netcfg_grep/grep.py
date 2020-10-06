@@ -23,11 +23,14 @@ __all__ = ["grep"]
 #
 # -----------------------------------------------------------------------------
 
+# regex start of line anchor
 _LINE_START_ = r"^"
+
+# allow line endings to include optional whitespace; cuz it happens :(
 _LINE_END_ = r"\s*$"
 
 
-def grep_include_line(parsed: CiscoConfParse, expr: str):
+def grep_include_line(parsed: CiscoConfParse, expr: str) -> str:
     found = parsed.find_lines(_LINE_START_ + expr)
 
     if (n_found := len(found)) != 1:
@@ -57,12 +60,6 @@ def grep_include_block(parsed: CiscoConfParse, expr: str) -> str:
     return "\n".join(parsed.find_all_children(_LINE_START_ + expr + _LINE_END_))
 
 
-def grep_include_exact_block(parsed: CiscoConfParse, expr: str) -> str:
-    return "\n".join(
-        parsed.find_all_children(_LINE_START_ + re.escape(expr) + _LINE_END_)
-    )
-
-
 def grep_include_block_lines(parsed: CiscoConfParse, expr: str) -> str:
     return "\n".join(parsed.find_all_children(_LINE_START_ + expr))
 
@@ -71,7 +68,6 @@ FILTER_OPTIONS = {
     "include-line": grep_include_line,
     "include-exact-lines": grep_include_exact_lines,
     "include-block": grep_include_block,
-    "include-exact-block": grep_include_exact_block,
     "include-block-lines": grep_include_block_lines,
 }
 
