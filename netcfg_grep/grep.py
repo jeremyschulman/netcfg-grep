@@ -15,7 +15,7 @@ from ciscoconfparse import CiscoConfParse
 # Exports
 # -----------------------------------------------------------------------------
 
-__all__ = ['grep']
+__all__ = ["grep"]
 
 # -----------------------------------------------------------------------------
 #
@@ -23,17 +23,15 @@ __all__ = ['grep']
 #
 # -----------------------------------------------------------------------------
 
-_LINE_START_ = '^'
-_LINE_END_ = '\s*$'
+_LINE_START_ = r"^"
+_LINE_END_ = r"\s*$"
 
 
 def grep_include_line(parsed: CiscoConfParse, expr: str):
     found = parsed.find_lines(_LINE_START_ + expr)
 
     if (n_found := len(found)) != 1:
-        raise RuntimeError(
-            f'Not exactly one ({n_found}) matching expr: {expr}'
-        )
+        raise RuntimeError(f"Not exactly one ({n_found}) matching expr: {expr}")
 
     return found[0]
 
@@ -42,35 +40,39 @@ def grep_include_exact_lines(parsed: CiscoConfParse, expr: str) -> str:
     res = list()
 
     for each_expr in expr.splitlines(keepends=False):
-        found = parsed.find_lines(_LINE_START_ + re.escape(each_expr.strip()) + _LINE_END_)
+        found = parsed.find_lines(
+            _LINE_START_ + re.escape(each_expr.strip()) + _LINE_END_
+        )
         if (n_found := len(found)) != 1:
             raise RuntimeError(
-                f'Not exactly one ({n_found}) matching expr: {each_expr}'
+                f"Not exactly one ({n_found}) matching expr: {each_expr}"
             )
 
         res.append(found[0])
 
-    return '\n'.join(res)
+    return "\n".join(res)
 
 
 def grep_include_block(parsed: CiscoConfParse, expr: str) -> str:
-    return '\n'.join(parsed.find_all_children(_LINE_START_ + expr + _LINE_END_))
+    return "\n".join(parsed.find_all_children(_LINE_START_ + expr + _LINE_END_))
 
 
 def grep_include_exact_block(parsed: CiscoConfParse, expr: str) -> str:
-    return '\n'.join(parsed.find_all_children(_LINE_START_ + re.escape(expr) + _LINE_END_))
+    return "\n".join(
+        parsed.find_all_children(_LINE_START_ + re.escape(expr) + _LINE_END_)
+    )
 
 
 def grep_include_block_lines(parsed: CiscoConfParse, expr: str) -> str:
-    return '\n'.join(parsed.find_all_children(_LINE_START_ + expr))
+    return "\n".join(parsed.find_all_children(_LINE_START_ + expr))
 
 
 FILTER_OPTIONS = {
-    'include-line': grep_include_line,
-    'include-exact-lines': grep_include_exact_lines,
-    'include-block': grep_include_block,
-    'include-exact-block': grep_include_exact_block,
-    'include-block-lines': grep_include_block_lines
+    "include-line": grep_include_line,
+    "include-exact-lines": grep_include_exact_lines,
+    "include-block": grep_include_block,
+    "include-exact-block": grep_include_exact_block,
+    "include-block-lines": grep_include_block_lines,
 }
 
 
@@ -102,8 +104,8 @@ def grep(ncg_config: dict, netcfg_filepath) -> List[str]:
     The list of string representing the results of each of the filter
     expressions defined in `ncg_config`.
     """
-    parsed = CiscoConfParse(config=netcfg_filepath, syntax=ncg_config['os_name'])
-    filters = ncg_config['filters']
+    parsed = CiscoConfParse(config=netcfg_filepath, syntax=ncg_config["os_name"])
+    filters = ncg_config["filters"]
 
     grep_results = list()
 
@@ -113,12 +115,13 @@ def grep(ncg_config: dict, netcfg_filepath) -> List[str]:
         # since future filter_rec content could be more than just the filter
         # option.
 
-        filter_opt = next((opt for opt, value in filter_rec.items()
-                           if opt in FILTER_OPTIONS), None)
+        filter_opt = next(
+            (opt for opt, value in filter_rec.items() if opt in FILTER_OPTIONS), None
+        )
 
         if not filter_opt:
             raise RuntimeError(
-                f'No valid filter option found in filter item {filter_idx}'
+                f"No valid filter option found in filter item {filter_idx}"
             )
 
         filter_func = FILTER_OPTIONS[filter_opt]
