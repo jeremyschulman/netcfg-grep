@@ -11,7 +11,7 @@ wrapper-tool around this library.
 
 You will need to identify the network OS sytax for parsing purposes.  You set this
 value in the config file using the `os_name` keyword.  You can provide any value
-that is valid for the `ciscoparseconf` library.  
+that is valid for the `ciscoparseconf` library.
 
 ```yaml
 os_name: nxos
@@ -47,7 +47,7 @@ filters:
 ```
 
 **Regex Match a Block**<br/>
-Use the `include-block` expression to match a specific block of configuration. 
+Use the `include-block` expression to match a specific block of configuration.
 The start of line anchor is automatically applied.  The end of line anchor ($)
 is automatically applied.  The block results will contain all children
 sub-blocks (if any).
@@ -68,12 +68,12 @@ filters:
     - include-block: interface Ethernet1
 ```
 
-Note that if your block contains regex special characters, the plus (+) for exmple, you 
+Note that if your block contains regex special characters, the plus (+) for exmple, you
 will need to explicitly escape it using the backslash as shown:
 
 ```yaml
 filters:
-  - include-block: aaa group server tacacs\+ MY_GROUP 
+  - include-block: aaa group server tacacs\+ MY_GROUP
 ```
 
 **Regex Match Multi-Line Block**<br/>
@@ -107,8 +107,8 @@ such as the $.  For example:
 username admin password 5 $1$GFT6wdTBABEFACEDEADBEEFODEdPPN  role network-admin
 ```
 
-Given the perpensity for multiple line use-cases, the `include-exact-lines` can 
-be used for more than one configuration file providing you use the folding pipe (|) 
+Given the perpensity for multiple line use-cases, the `include-exact-lines` can
+be used for more than one configuration file providing you use the folding pipe (|)
 as shown:
 
 ```yaml

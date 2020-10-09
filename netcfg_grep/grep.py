@@ -2,7 +2,7 @@
 # System Imports
 # -----------------------------------------------------------------------------
 
-from typing import List
+from typing import List, Optional
 import re
 
 # -----------------------------------------------------------------------------
@@ -30,13 +30,20 @@ _LINE_START_ = r"^"
 _LINE_END_ = r"\s*$"
 
 
+class FilterMatchError(RuntimeError):
+    def __init__(self, expr: str , count: Optional[int] = 0):
+        super().__init__()
+        self.expr = expr
+        self.count = count
+
+
 def grep_include_line(parsed: CiscoConfParse, expr: str) -> str:
     found = parsed.find_lines(_LINE_START_ + expr)
 
     if (n_found := len(found)) != 1:
-        raise RuntimeError(f"Not exactly one ({n_found}) matching expr: {expr}")
+        raise FilterMatchError(expr=expr, count=n_found)
 
-    return found[0]
+    return found[0].rstrip()
 
 
 def grep_include_exact_lines(parsed: CiscoConfParse, expr: str) -> str:
@@ -46,22 +53,21 @@ def grep_include_exact_lines(parsed: CiscoConfParse, expr: str) -> str:
         found = parsed.find_lines(
             _LINE_START_ + re.escape(each_expr.strip()) + _LINE_END_
         )
-        if (n_found := len(found)) != 1:
-            raise RuntimeError(
-                f"Not exactly one ({n_found}) matching expr: {each_expr}"
-            )
 
-        res.append(found[0])
+        if (n_found := len(found)) != 1:
+            raise FilterMatchError(expr=each_expr, count=n_found)
+
+        res.append(found[0].rstrip())
 
     return "\n".join(res)
 
 
 def grep_include_block(parsed: CiscoConfParse, expr: str) -> str:
-    return "\n".join(parsed.find_all_children(_LINE_START_ + expr + _LINE_END_))
+    return "\n".join(map(str.rstrip, parsed.find_all_children(_LINE_START_ + expr + _LINE_END_)))
 
 
 def grep_include_block_lines(parsed: CiscoConfParse, expr: str) -> str:
-    return "\n".join(parsed.find_all_children(_LINE_START_ + expr))
+    return "\n".join(map(str.rstrip, parsed.find_all_children(_LINE_START_ + expr)))
 
 
 FILTER_OPTIONS = {
@@ -72,7 +78,10 @@ FILTER_OPTIONS = {
 }
 
 
-def grep(ncg_config: dict, netcfg_filepath) -> List[str]:
+def grep(
+    ncg_config: dict, netcfg_filepath, raise_onerror: Optional[bool] = False,
+    debug: Optional[bool] = False
+) -> List[str]:
     """
     This function uses the provided grep config ncg_config to filter the
     configuration sections from the network configuration file
@@ -89,11 +98,17 @@ def grep(ncg_config: dict, netcfg_filepath) -> List[str]:
         The filepath to the network configuration file.  This file must be
         consumable by the `ciscoparseconf` package.
 
-    Raises
-    ------
-    RuntimeError:
-        When there was an issue processing either the ncg_config definition
-        or parsing the contents of the network configuraiton file.
+    raise_onerror: bool
+        When False (default) any filter expression that results in not found is simply
+        ignored, which is a similiar behavior of grep.  Set `ignore_notfound` to True
+        and any missing values will raise a FilterMatchError.
+
+    debug: bool
+        When True, and when raise_onerr is False, then add a debug line to
+        indicate the error in the output.  When False (default) and
+        raise_onerror is False, then the missing filtered value is returned as
+        empty-string.
+
 
     Returns
     -------
@@ -121,7 +136,25 @@ def grep(ncg_config: dict, netcfg_filepath) -> List[str]:
             )
 
         filter_func = FILTER_OPTIONS[filter_opt]
-        res = filter_func(parsed, expr=filter_rec[filter_opt])
+        filter_expr = filter_rec[filter_opt]
+
+        try:
+            res = filter_func(parsed, filter_expr)
+
+        except FilterMatchError as exc:
+            if raise_onerror:
+                raise RuntimeError(
+                    f"filter match error[ {filter_opt}: {exc.expr} ] ({exc.count})"
+                )
+
+            if debug is True:
+                if exc.count == 0:
+                    res = f"! DEBUG-MISSING: {exc.expr}"
+                else:
+                    res = f"! DEBUG-EXTRA: {exc.expr}"
+            else:
+                res = ''
+
         grep_results.append(res)
 
     return grep_results

@@ -1,3 +1,4 @@
+import sys
 from importlib import metadata
 
 import click
@@ -20,7 +21,26 @@ VERSION = metadata.version("netcfg-grep")
     help="network device configuration TEXT file",
     type=click.File(),
 )
-def cli(grep_config, device_config):
+@click.option(
+    "--fail-error",
+    help="Fail and stop when filter expression not found as expected",
+    is_flag=True,
+)
+@click.option(
+    '--debug', is_flag=True,
+    help='Add debug comment lines to output for missing filtered values'
+)
+def cli(grep_config, device_config, fail_error, debug):
     ncg_config = yaml.safe_load(grep_config)
-    results_list = grep(ncg_config=ncg_config, netcfg_filepath=device_config.name)
-    print("\n\n".join(results_list))
+    try:
+        results_list = grep(
+            ncg_config=ncg_config,
+            netcfg_filepath=device_config.name,
+            raise_onerror=fail_error,
+            debug=debug
+        )
+
+    except RuntimeError as exc:
+        sys.exit(f"ABORT {device_config.name}: {exc.args[0]}")
+    else:
+        print("\n\n".join(results_list))
