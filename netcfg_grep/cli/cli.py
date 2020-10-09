@@ -27,8 +27,9 @@ VERSION = metadata.version("netcfg-grep")
     is_flag=True,
 )
 @click.option(
-    '--debug', is_flag=True,
-    help='Add debug comment lines to output for missing filtered values'
+    "--debug",
+    is_flag=True,
+    help="Add debug comment lines to output for missing filtered values",
 )
 def cli(grep_config, device_config, fail_error, debug):
     ncg_config = yaml.safe_load(grep_config)
@@ -37,7 +38,7 @@ def cli(grep_config, device_config, fail_error, debug):
             ncg_config=ncg_config,
             netcfg_filepath=device_config.name,
             raise_onerror=fail_error,
-            debug=debug
+            debug=debug,
         )
 
     except RuntimeError as exc:

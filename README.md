@@ -1,7 +1,7 @@
 # Network Device Config Grep Tool
 
 This package contains a tool called `netcfg-grep` that allows a User to extract (grep)
-specific sections of a network configuration file.  
+specific sections of a network configuration file.
 
 **The motivating Use-Case**
 
@@ -12,7 +12,7 @@ I might want to only check the "IP access Lists" or the "VLAN interfaces" for au
 compliance.
 
 As such, I would use the `netcfg-grep` tool to extract only those sections I
-want to examine from the actual configuration file.  I will also have 
+want to examine from the actual configuration file.  I will also have
 **expected** configuration file(s).  I would use the same netcfg-grep control
 file to extract the same sections from the expected configuration file so
 that I could diff the results of the acutal config against the results of
@@ -29,13 +29,13 @@ icdiff on my laptop, or I might want to use Github compare feature.
 # Overview
 
 The following diagram illustrates the general process to use the `netcfg-grep` tool
-for audit purposes. 
+for audit purposes.
 
 ![overveiw](docs/netcfg-grep-doc.png)
 
 Create a `netcfg-grep` filter control file (A) that defines your specific
 sections you want to extract from the device configuration files.  This is a YAML file, and the
-structure of this file is described [here](docs/config.md).  
+structure of this file is described [here](docs/config.md).
 
 Next, process (1), is to execute the `netcfg-grep` tool using the actual
 configuration file (B). The output output file (C) will contains only the
@@ -47,7 +47,7 @@ int he control file (A).
 
 At this point the output files (C) and (E) contents can be diff'd using any text-diff tool, or
 system that supports diff'ing such as github.  The text difference, output (F), represents
-whether the audit is a "pass" or "fail."  
+whether the audit is a "pass" or "fail."
 
 # Installation
 

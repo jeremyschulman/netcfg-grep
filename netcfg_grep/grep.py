@@ -31,7 +31,7 @@ _LINE_END_ = r"\s*$"
 
 
 class FilterMatchError(RuntimeError):
-    def __init__(self, expr: str , count: Optional[int] = 0):
+    def __init__(self, expr: str, count: Optional[int] = 0):
         super().__init__()
         self.expr = expr
         self.count = count
@@ -63,7 +63,9 @@ def grep_include_exact_lines(parsed: CiscoConfParse, expr: str) -> str:
 
 
 def grep_include_block(parsed: CiscoConfParse, expr: str) -> str:
-    return "\n".join(map(str.rstrip, parsed.find_all_children(_LINE_START_ + expr + _LINE_END_)))
+    return "\n".join(
+        map(str.rstrip, parsed.find_all_children(_LINE_START_ + expr + _LINE_END_))
+    )
 
 
 def grep_include_block_lines(parsed: CiscoConfParse, expr: str) -> str:
@@ -79,8 +81,10 @@ FILTER_OPTIONS = {
 
 
 def grep(
-    ncg_config: dict, netcfg_filepath, raise_onerror: Optional[bool] = False,
-    debug: Optional[bool] = False
+    ncg_config: dict,
+    netcfg_filepath,
+    raise_onerror: Optional[bool] = False,
+    debug: Optional[bool] = False,
 ) -> List[str]:
     """
     This function uses the provided grep config ncg_config to filter the
@@ -153,7 +157,7 @@ def grep(
                 else:
                     res = f"! DEBUG-EXTRA: {exc.expr}"
             else:
-                res = ''
+                res = ""
 
         grep_results.append(res)
 
