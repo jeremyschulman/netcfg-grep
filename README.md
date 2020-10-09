@@ -67,7 +67,4 @@ extract the results from the network configuration file:
 netcfg-grep -g grep-config-file.yaml -d device-config-file.txt > filtered-output.txt
 ```
 
-The structure of the `netcfg-grep` configuration file is current a WIP, and will
-be documented [here](docs/config.md)
-
 
